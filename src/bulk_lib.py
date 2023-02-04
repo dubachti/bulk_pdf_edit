@@ -3,16 +3,17 @@ from pdf2image import convert_from_path
 from PIL import Image
 from PyPDF2 import PdfMerger
 
-ALL_ACTIONS = ["opacity", "merge", "rotate", "rename"]
+ALL_ACTIONS = ["opacity", "merge"]
 
+# constructs filepaths calls appropriate func
 def bulk_handler(args):
-    ## not if this is the way to go
     args["file_paths"] = glob.glob("{}/*.pdf".format(args["path"]))
     action = "bulk_" + args["action"]
     func = globals()[action]
     func(**args)
 
-def bulk_opacity(file_paths: list[str],   # addr to directory
+# modifys opacity of 'file_paths' files
+def bulk_opacity(file_paths: list[str],
                  opacity_val: int, # in %
                  overwrite: bool,
                  dpi: int = 100,
@@ -35,6 +36,7 @@ def bulk_opacity(file_paths: list[str],   # addr to directory
     for f_path, page in zip(new_file_paths, pages):
         page[0].save(f_path, "PDF", resolution=100.0, save_all=True, append_images=page[1:])
 
+# merges all 'file_paths' files together into one pdf file
 def bulk_merge(file_paths: list[str],
                path: str,
                out_name: str = "merged_file",
@@ -46,19 +48,3 @@ def bulk_merge(file_paths: list[str],
     [merger.append(file) for file in file_paths]
     merger.write(f"{path}/{out_name}.pdf")
     merger.close()
-
-def bulk_rotate(file_paths: list[str],      # addr to directory
-                rotation_val: int,   # cw rotation angle
-                **_
-                ) -> None:
-    #print("bulk_rotate", file_paths, rotation_val)
-    #https://stackoverflow.com/questions/46921452/batch-rotate-pdf-files-with-pypdf2
-    raise NotImplementedError
-
-def bulk_rename(file_paths: list[str],                         # addr to directory
-                name_func: list[tuple[str, str]],   # rename func: f(old_namespace) -> new_namespace
-                **_
-                ) -> None:
-    #print("bulk_rename", file_paths, name_func)
-    raise NotImplementedError
-
